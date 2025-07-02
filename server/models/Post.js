@@ -1,5 +1,3 @@
-// Post.js - Mongoose model for blog posts
-
 const mongoose = require('mongoose');
 
 const PostSchema = new mongoose.Schema(
@@ -20,22 +18,21 @@ const PostSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      required: true,
-      unique: true,
+      unique: true,  // ✅ Removed `required: true`
     },
     excerpt: {
       type: String,
       maxlength: [200, 'Excerpt cannot be more than 200 characters'],
     },
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,
       required: true,
+      trim: true,
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
+      type: String,
       required: true,
+      trim: true,
     },
     tags: [String],
     isPublished: {
@@ -66,17 +63,15 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Create slug from title before saving
+// ✅ Auto-generate slug from title before saving
 PostSchema.pre('save', function (next) {
-  if (!this.isModified('title')) {
-    return next();
-  }
-  
+  if (!this.isModified('title')) return next();
+
   this.slug = this.title
     .toLowerCase()
     .replace(/[^\w ]+/g, '')
     .replace(/ +/g, '-');
-    
+
   next();
 });
 
@@ -97,4 +92,4 @@ PostSchema.methods.incrementViewCount = function () {
   return this.save();
 };
 
-module.exports = mongoose.model('Post', PostSchema); 
+module.exports = mongoose.model('Post', PostSchema);
